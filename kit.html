@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>72-hour kit builder | Prepper Daily</title>
+<meta name="description" content="Build a 3-day emergency kit list by family size using Ready.gov guidance.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600&family=Lora:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="app">
+  <div class="brand"><a href="index.html">Prepper Daily</a></div>
+  <div class="sub">Free readiness tools. Results show right away. Nothing is collected on this page.</div>
+</header>
+
+<main>
+  <h1>72-hour kit builder</h1>
+  <p>Ready.gov says a basic kit should cover several days of water, food, and other supplies, and that you should keep one at home, and consider separate kits for work and the car. This builder sizes a 3-day list to the people in your house.</p>
+  <div class="card">
+    <div class="row">
+      <div><label for="adults">Adults</label><input id="adults" type="number" min="0" value="2"></div>
+      <div><label for="children">Children</label><input id="children" type="number" min="0" value="2"></div>
+      <div><label for="infants">Infants</label><input id="infants" type="number" min="0" value="0"></div>
+    </div>
+    <div class="row">
+      <div><label for="pets">Pets</label><input id="pets" type="number" min="0" value="0"></div>
+      <div>
+        <label for="place">Where this kit will live</label>
+        <select id="place">
+          <option value="home" selected>Home</option>
+          <option value="car">Car</option>
+          <option value="work">Workplace (24 hours or more)</option>
+        </select>
+      </div>
+    </div>
+    <label><input type="checkbox" id="meds"> Someone has a daily prescription medication (adds a reminder, not medical advice)</label>
+    <label><input type="checkbox" id="nocook"> Prefer no-cook food</label>
+    <div id="out" class="result" aria-live="polite"></div>
+    <button type="button" class="secondary" id="printBtn">Print or save this list</button>
+  </div>
+  <p class="muted">This is a packing guide, not a free product. If you want a printable household checklist, Prepper Daily's 72-Hour Kit Checklist is a $5 paid download. You do not need it to use this list.</p>
+  <p class="source">Sources: <a href="https://www.ready.gov/kit">Ready.gov, Build a kit</a> and <a href="https://www.ready.gov/water">Ready.gov, Water</a>. The car list also follows <a href="https://www.ready.gov/winter-weather">Ready.gov winter weather</a> guidance.</p>
+<script>
+function n(id){ return Math.max(0, Number(document.getElementById(id).value || 0)); }
+function render(){
+  const adults=n('adults'), children=n('children'), infants=n('infants'), pets=n('pets');
+  const people=adults+children+infants;
+  const place=document.getElementById('place').value;
+  const meds=document.getElementById('meds').checked;
+  const nocook=document.getElementById('nocook').checked;
+  const days = place==='work' ? 1 : 3;
+  const gallons = people * days;
+  const meals = people * 3 * days;
+  const where = place==='home' ? 'Keep this kit in a designated place and make sure everyone knows where it is.' :
+    place==='car' ? 'Keep this kit in the car in case you are stranded. Ready.gov also says to keep a fuller tank of gas in winter.' :
+    'Ready.gov says to be ready to stay at work for at least 24 hours, with food, water, medicine, and comfortable walking shoes.';
+  const foodLine = nocook
+    ? meals + ' no-cook servings (about 3 meals a day for ' + days + ' day(s)). Choose foods that do not need a stove, and include a manual can opener if you pack cans.'
+    : 'At least ' + days + ' day(s) of non-perishable food, about ' + meals + ' meals if you plan 3 a day. Include a manual can opener.';
+  let extra=[];
+  if (infants>0) extra.push('Infant supplies: formula, bottles, diapers, wipes, and diaper rash cream for ' + infants + ' infant(s).');
+  if (pets>0) extra.push('Pet food and extra water for ' + pets + ' pet(s). Ready.gov includes pets in the kit list; use an amount you know your animals actually drink and eat.');
+  if (meds) extra.push('A reminder only: pack a few days of each daily prescription in the original labeled container, and a list of the names. Ask your pharmacist or clinician if you need help planning a supply. This tool does not give medical advice.');
+  if (children>0) extra.push('A change of clothes and a small activity (book, game, or puzzle) for ' + children + ' child(ren).');
+  const items = [
+    'Water: ' + gallons + ' gallon(s) for ' + people + ' people for ' + days + ' day(s), at Ready.gov\\'s one gallon per person per day. Store more if you can.',
+    foodLine,
+    'Flashlight and extra batteries',
+    'Battery-powered or hand-crank radio, and a NOAA Weather Radio if you have one',
+    'First aid kit',
+    'Whistle, to signal for help',
+    'Dust mask',
+    'Moist towelettes, garbage bags, and plastic ties for sanitation',
+    'Wrench or pliers to turn off utilities, if you may need them',
+    'Local maps, and a cell phone charger plus a backup battery',
+    'A warm blanket or sleeping bag for each person',
+    'A complete change of clothing and sturdy shoes suited to the season',
+    'Copies of important papers in a waterproof pouch, and some cash in small bills'
+  ];
+  if (place==='car') {
+    items.push('Jumper cables, an ice scraper, a small shovel, and sand or kitty litter for traction');
+    items.push('A bright cloth you can tie to the antenna or door');
+  }
+  const extraHtml = extra.length ? '<h3>For your household</h3><ul class="list-out">' + extra.map(x=>'<li>'+x+'</li>').join('') + '</ul>' : '';
+  document.getElementById('out').innerHTML =
+    '<h2>Your ' + days + '-day list for ' + people + ' people</h2>' +
+    '<p>' + where + '</p>' +
+    '<ul class="list-out">' + items.map(x=>'<li>'+x+'</li>').join('') + '</ul>' + extraHtml;
+}
+['adults','children','infants','pets','place','meds','nocook'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', render);
+  document.getElementById(id).addEventListener('change', render);
+});
+document.getElementById('printBtn').addEventListener('click', ()=>window.print());
+render();
+</script>
+
+<div class="signup">
+  <p>If you want a short, practical tip in your inbox each morning, you can join Prepper Daily free.</p>
+  <a class="btn" href="https://jds-newsletter-66e0ed.beehiiv.com/subscribe">Join free</a>
+</div>
+</main>
+<footer class="app">
+  <p>Prepper Daily. Calm, practical readiness from JD in Utah.</p>
+  <p><a href="index.html">All tools</a></p>
+</footer>
+</body>
+</html>

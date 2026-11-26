@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Water storage calculator | Prepper Daily</title>
+<meta name="description" content="Calculate emergency water storage using Ready.gov's one gallon per person per day.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600&family=Lora:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="app">
+  <div class="brand"><a href="index.html">Prepper Daily</a></div>
+  <div class="sub">Free readiness tools. Results show right away. Nothing is collected on this page.</div>
+</header>
+
+<main>
+  <h1>Water storage calculator</h1>
+  <p>Ready.gov says to store at least one gallon of water per person per day, for several days, for drinking and sanitation. In very hot weather, needs can double. This tool does that math for you.</p>
+  <div class="card">
+    <div class="row">
+      <div>
+        <label for="people">People</label>
+        <input id="people" type="number" min="1" step="1" value="4">
+      </div>
+      <div>
+        <label for="days">Days</label>
+        <select id="days">
+          <option value="3" selected>3 days</option>
+          <option value="7">7 days</option>
+          <option value="14">14 days</option>
+        </select>
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label for="pets">Pets (optional)</label>
+        <input id="pets" type="number" min="0" step="1" value="0">
+      </div>
+      <div>
+        <label for="petgal">Gallons per pet per day</label>
+        <input id="petgal" type="number" min="0" step="0.25" value="1">
+      </div>
+    </div>
+    <p class="muted">Ready.gov does not set a single official amount for pets. The pet gallons field is a planning number you can change. It is not an official requirement.</p>
+    <label><input type="checkbox" id="hot"> Hot weather or higher needs (Ready.gov notes that needs can double in very hot temperatures)</label>
+    <div id="out" class="result" aria-live="polite"></div>
+  </div>
+  <p class="source">Source: <a href="https://www.ready.gov/water">Ready.gov, Water</a>. A gallon of water weighs about 8.3 pounds. Ready.gov also notes that children, nursing mothers, and people who are sick may need more than the baseline.</p>
+  <p class="muted">If you fill your own food-grade containers, Ready.gov says to replace that water about every six months. Sealed store-bought water can stay in a cool, dark place in its original container.</p>
+<script>
+const galWeight = 8.3;
+function n(id){ return Number(document.getElementById(id).value || 0); }
+function render(){
+  const people = Math.max(0, n('people'));
+  const days = Math.max(1, n('days'));
+  const pets = Math.max(0, n('pets'));
+  const petgal = Math.max(0, n('petgal'));
+  const hot = document.getElementById('hot').checked;
+  const personRate = hot ? 2 : 1;
+  const personGal = people * personRate * days;
+  const petTotal = pets * petgal * days;
+  const total = personGal + petTotal;
+  const pounds = total * galWeight;
+  const peopleBit = people === 1 ? '1 person' : people + ' people';
+  const rateBit = hot ? '2 gallons per person per day (the doubled hot-weather figure Ready.gov mentions)' : 'Ready.gov\\'s baseline of 1 gallon per person per day';
+  let petBit = '';
+  if (pets > 0 && petgal > 0) {
+    petBit = ' Plus ' + petTotal + ' gallons for pets, using your planning amount of ' + petgal + ' gallon(s) per pet per day.';
+  }
+  document.getElementById('out').innerHTML =
+    '<h2>' + (Number.isInteger(total) ? total : total.toFixed(1)) + ' gallons</h2>' +
+    '<p>About ' + pounds.toFixed(0) + ' pounds.</p>' +
+    '<p>For ' + peopleBit + ' for ' + days + ' days, that uses ' + rateBit + '. That is ' + (Number.isInteger(personGal) ? personGal : personGal.toFixed(1)) + ' gallons for people.' + petBit + '</p>';
+}
+['people','days','pets','petgal','hot'].forEach(id => {
+  document.getElementById(id).addEventListener('input', render);
+  document.getElementById(id).addEventListener('change', render);
+});
+render();
+</script>
+
+<div class="signup">
+  <p>If you want a short, practical tip in your inbox each morning, you can join Prepper Daily free.</p>
+  <a class="btn" href="https://jds-newsletter-66e0ed.beehiiv.com/subscribe">Join free</a>
+</div>
+</main>
+<footer class="app">
+  <p>Prepper Daily. Calm, practical readiness from JD in Utah.</p>
+  <p><a href="index.html">All tools</a></p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Food storage shelf-life lookup | Prepper Daily</title>
+<meta name="description" content="Look up official USDA FoodKeeper pantry, fridge, and freezer storage times.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600&family=Lora:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="app">
+  <div class="brand"><a href="index.html">Prepper Daily</a></div>
+  <div class="sub">Free readiness tools. Results show right away. Nothing is collected on this page.</div>
+</header>
+
+<main>
+  <h1>Food storage shelf-life lookup</h1>
+  <p>Search a food name and see the official USDA FoodKeeper storage times. These figures are about quality and storage, not a personal food-safety ruling. When in doubt, use the official FoodKeeper app or site.</p>
+  <div class="card">
+    <label for="q">Search a food</label>
+    <input id="q" type="search" placeholder="Try rice, peanut butter, or canned beans" autocomplete="off">
+    <ul id="search-results"></ul>
+    <div id="out" class="result" hidden></div>
+  </div>
+  <p class="source">Source: <a href="https://www.foodsafety.gov/keep-food-safe/foodkeeper-app">USDA FSIS FoodKeeper</a>. General storage habits also appear on <a href="https://www.ready.gov/food">Ready.gov, Food</a>.</p>
+  <p class="muted">FoodKeeper times often start from the date of purchase. After opening, use the "after opening" line when one is listed.</p>
+<script>
+function fmt(block, afterPurchase){
+  if(!block) return '';
+  const a=block.min, b=block.max, m=block.metric||'';
+  let t='';
+  if(a!=null && b!=null && a===b) t=a+' '+m.toLowerCase();
+  else if(a!=null && b!=null) t=a+' to '+b+' '+m.toLowerCase();
+  else if(a!=null) t=a+' '+m.toLowerCase();
+  else if(b!=null) t=b+' '+m.toLowerCase();
+  if(t && afterPurchase) t += ' from date of purchase';
+  if(block.tips) t = (t? t+'. ' : '') + block.tips;
+  return t;
+}
+function line(label, block, dop){
+  const t=fmt(block,false) || fmt(dop,true);
+  return t ? '<li><strong>'+label+':</strong> '+t+'</li>' : '';
+}
+let DATA=[];
+function search(q){
+  q=q.trim().toLowerCase();
+  if(q.length<2) return [];
+  const scored=[];
+  for(const item of DATA){
+    const name=(item.name||'').toLowerCase();
+    const sub=(item.subtitle||'').toLowerCase();
+    const keys=(item.keywords||'').toLowerCase();
+    let score=0;
+    if(name===q) score=100;
+    else if(name.startsWith(q)) score=80;
+    else if(name.includes(q)) score=60;
+    else if(sub.includes(q)) score=40;
+    else if(keys.includes(q)) score=20;
+    if(score) scored.push([score, item]);
+  }
+  scored.sort((a,b)=>b[0]-a[0] || a[1].name.localeCompare(b[1].name));
+  return scored.slice(0,20).map(x=>x[1]);
+}
+function show(item){
+  const title=item.subtitle ? item.name+', '+item.subtitle : item.name;
+  const parts=[
+    line('Pantry', item.pantry, item.pantry_dop),
+    line('Pantry after opening', item.pantry_open, null),
+    line('Refrigerator', item.fridge, item.fridge_dop),
+    line('Refrigerator after opening', item.fridge_open, null),
+    line('Refrigerator after thawing', item.fridge_thaw, null),
+    line('Freezer', item.freeze, item.freeze_dop)
+  ].filter(Boolean).join('');
+  const el=document.getElementById('out');
+  el.hidden=false;
+  el.innerHTML='<h2>'+title+'</h2>'+(parts? '<ul class="list-out">'+parts+'</ul>':'<p>No storage times were listed for this item in the FoodKeeper table shipped with this tool.</p>')+'<p class="muted">Confirm the latest figure in the official FoodKeeper app if you need it for a specific product.</p>';
+}
+const box=document.getElementById('q');
+const list=document.getElementById('search-results');
+box.addEventListener('input', ()=>{
+  const hits=search(box.value);
+  list.innerHTML=hits.map((item,i)=>{
+    const label=item.subtitle? item.name+', '+item.subtitle : item.name;
+    return '<li><button type="button" data-i="'+i+'">'+label+'</button></li>';
+  }).join('');
+  list.querySelectorAll('button').forEach((btn,i)=>{
+    btn.addEventListener('click', ()=>show(hits[i]));
+  });
+  if(hits.length===1) show(hits[0]);
+});
+fetch('foodkeeper.json').then(r=>r.json()).then(j=>{ DATA=j.items||[]; });
+</script>
+
+<div class="signup">
+  <p>If you want a short, practical tip in your inbox each morning, you can join Prepper Daily free.</p>
+  <a class="btn" href="https://jds-newsletter-66e0ed.beehiiv.com/subscribe">Join free</a>
+</div>
+</main>
+<footer class="app">
+  <p>Prepper Daily. Calm, practical readiness from JD in Utah.</p>
+  <p><a href="index.html">All tools</a></p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,3 @@
+Food storage times in this tool come from USDA FSIS FoodKeeper data (public domain), the same dataset behind the official FoodKeeper app.
+Official app and current feed: https://www.foodsafety.gov/keep-food-safe/foodkeeper-app
+The live USDA JSON feed could not be downloaded from this environment (the host blocked it), so the tool ships a public-domain FoodKeeper table with the official field names (Pantry_Min, DOP_Pantry_Max, and so on). Times are quality and storage guidance from that dataset, not a personal food-safety ruling.
