@@ -65,7 +65,7 @@ function render(){
   const total = personGal + petTotal;
   const pounds = total * galWeight;
   const peopleBit = people === 1 ? '1 person' : people + ' people';
-  const rateBit = hot ? '2 gallons per person per day (the doubled hot-weather figure Ready.gov mentions)' : 'Ready.gov\\'s baseline of 1 gallon per person per day';
+  const rateBit = hot ? '2 gallons per person per day (the doubled hot-weather figure Ready.gov mentions)' : 'Ready.gov\'s baseline of 1 gallon per person per day';
   let petBit = '';
   if (pets > 0 && petgal > 0) {
     petBit = ' Plus ' + petTotal + ' gallons for pets, using your planning amount of ' + petgal + ' gallon(s) per pet per day.';
